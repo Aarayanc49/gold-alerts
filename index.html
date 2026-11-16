@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gold Alerts</title>
+<meta name="description" content="Level, trade and bot alerts from the gold bots">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gold Alerts">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root {
+  --bg: #f6f5f2; --card: #ffffff; --ink: #1b1d22; --mute: #6b6f78; --line: #e4e2dc;
+  --gold: #b8860b; --gold-soft: #f6ecd3; --up: #1f8a4c; --down: #c4392d; --warn: #b26a00;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --card: #181b21; --ink: #eceae4; --mute: #8d919a; --line: #262a32;
+    --gold: #e0b54a; --gold-soft: #2a2416; --up: #4cc27f; --down: #ef6a5d; --warn: #f0a640;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --card: #181b21; --ink: #eceae4; --mute: #8d919a; --line: #262a32;
+  --gold: #e0b54a; --gold-soft: #2a2416; --up: #4cc27f; --down: #ef6a5d; --warn: #f0a640;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; }
+body { padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 24px); max-width: 640px; margin: 0 auto; }
+header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+h1 { font-size: 24px; margin: 0; letter-spacing: -0.02em; }
+h1 span { color: var(--gold); }
+.pill { font-size: 12px; padding: 4px 10px; border-radius: 99px; background: var(--card); border: 1px solid var(--line); color: var(--mute); }
+.pill.on { color: var(--up); border-color: color-mix(in srgb, var(--up) 40%, var(--line)); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.card h2 { font-size: 15px; margin: 0 0 6px; }
+.card p { margin: 0 0 10px; color: var(--mute); }
+.card ol { margin: 0; padding-left: 20px; color: var(--mute); }
+button { font: inherit; border: 0; border-radius: 10px; padding: 11px 14px; background: var(--gold); color: #1a1405; font-weight: 600; width: 100%; }
+button.ghost { background: transparent; color: var(--mute); border: 1px solid var(--line); font-weight: 500; width: auto; padding: 7px 12px; }
+textarea { width: 100%; font: 12px/1.35 ui-monospace, Menlo, monospace; background: var(--bg); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px; height: 92px; resize: none; margin-bottom: 8px; word-break: break-all; }
+.chips { display: flex; gap: 6px; overflow-x: auto; margin: 4px 0 10px; padding-bottom: 2px; }
+.chip { flex: none; font-size: 13px; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--card); color: var(--mute); }
+.chip.sel { background: var(--gold-soft); color: var(--ink); border-color: var(--gold); }
+.feedhead { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
+.feedhead h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mute); margin: 0; }
+.item { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.dot { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-size: 14px; font-weight: 700; background: var(--gold-soft); color: var(--gold); }
+.dot.trade { background: color-mix(in srgb, var(--up) 15%, transparent); color: var(--up); }
+.dot.loss { background: color-mix(in srgb, var(--down) 15%, transparent); color: var(--down); }
+.dot.bot { background: color-mix(in srgb, var(--warn) 15%, transparent); color: var(--warn); }
+.it { font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.it time { font-weight: 400; color: var(--mute); font-size: 12px; flex: none; }
+.ib { color: var(--mute); white-space: pre-line; font-size: 14px; }
+.item.unread .it::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); align-self: center; margin-right: -2px; }
+.empty { text-align: center; color: var(--mute); padding: 30px 0; }
+.hide { display: none; }
+.small { font-size: 12px; color: var(--mute); }
+</style>
+</head>
+<body>
+<header>
+  <h1><span>Au</span> Gold Alerts</h1>
+  <span id="status" class="pill">not set up</span>
+</header>
+
+<div id="install" class="card hide">
+  <h2>Add this to your Home Screen first</h2>
+  <p>iPhone only sends notifications to apps opened from the Home Screen.</p>
+  <ol>
+    <li>Tap the Share button in Safari</li>
+    <li>Choose <b>Add to Home Screen</b></li>
+    <li>Open <b>Gold Alerts</b> from the new icon</li>
+  </ol>
+</div>
+
+<div id="enable" class="card hide">
+  <h2>Turn on notifications</h2>
+  <p>Gets you level touches and breaks, every bot trade, and a warning if Algo Trading goes off or a bot stops.</p>
+  <button id="enableBtn">Enable notifications</button>
+</div>
+
+<div id="pair" class="card hide">
+  <h2>Pairing code</h2>
+  <p>Send this code to the PC once (paste it to Claude, or run <code>python scripts/phone_alerts.py --pair CODE</code>). Then the alerts start.</p>
+  <textarea id="code" readonly></textarea>
+  <button id="copyBtn">Copy code</button>
+  <p class="small" id="copied"></p>
+</div>
+
+<div class="feedhead">
+  <h2>Alerts</h2>
+  <div>
+    <button class="ghost" id="codeBtn">Code</button>
+    <button class="ghost" id="clearBtn">Clear</button>
+  </div>
+</div>
+<div class="chips" id="chips">
+  <button class="chip sel" data-k="all">All</button>
+  <button class="chip" data-k="level">Levels</button>
+  <button class="chip" data-k="trade">Trades</button>
+  <button class="chip" data-k="setup">Setups</button>
+  <button class="chip" data-k="bot">Bots</button>
+</div>
+<div class="card" id="feed"><div class="empty">Nothing yet.</div></div>
+
+<script>
+const VAPID = 'BGNkBXvjVFSHrozgv_14js-EQ2Lol0KUkV9RZ5igZAr_AqdwEOUMC7clcly1ZbcX272IlJLyihKnkSp90uFmsQA';
+const $ = id => document.getElementById(id);
+let filter = 'all';
+
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const pushable = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+function b64(u8) { return btoa(String.fromCharCode(...u8)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function unb64(s) {
+  s = s.replace(/-/g, '+').replace(/_/g, '/'); s += '='.repeat((4 - s.length % 4) % 4);
+  return Uint8Array.from(atob(s), c => c.charCodeAt(0));
+}
+function codeFor(sub) { return b64(new TextEncoder().encode(JSON.stringify(sub.toJSON()))); }
+
+function db() {
+  return new Promise((ok, no) => {
+    const r = indexedDB.open('gold-alerts', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('alerts', { keyPath: 'id' });
+    r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error);
+  });
+}
+async function all() {
+  const d = await db();
+  return new Promise(ok => { const q = d.transaction('alerts').objectStore('alerts').getAll(); q.onsuccess = () => ok(q.result); q.onerror = () => ok([]); });
+}
+async function markRead(items) {
+  const d = await db(); const tx = d.transaction('alerts', 'readwrite'); const st = tx.objectStore('alerts');
+  items.filter(a => !a.read).forEach(a => st.put({ ...a, read: true }));
+  if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
+}
+async function clearAll() {
+  const d = await db(); d.transaction('alerts', 'readwrite').objectStore('alerts').clear(); render();
+}
+
+function ago(t) {
+  const s = Date.now() / 1000 - t;
+  if (s < 60) return 'now';
+  if (s < 3600) return Math.floor(s / 60) + 'm';
+  if (s < 86400) return Math.floor(s / 3600) + 'h';
+  return new Date(t * 1000).toLocaleDateString([], { day: 'numeric', month: 'short' });
+}
+const ICON = { level: '≡', trade: '$', setup: '◆', bot: '!', info: 'i' };
+function esc(s) { return String(s ?? '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+
+async function render() {
+  const items = (await all()).sort((a, b) => b.t - a.t);
+  const shown = items.filter(a => filter === 'all' || a.kind === filter).slice(0, 300);
+  $('feed').innerHTML = shown.length ? shown.map(a => {
+    const cls = a.kind === 'trade' && a.loss ? 'loss' : a.kind;
+    return `<div class="item ${a.read ? '' : 'unread'}"><div class="dot ${cls}">${ICON[a.kind] || 'i'}</div>
+      <div><div class="it"><span>${esc(a.title)}</span><time>${ago(a.t)}</time></div><div class="ib">${esc(a.body)}</div></div></div>`;
+  }).join('') : '<div class="empty">Nothing yet.</div>';
+  if (document.visibilityState === 'visible') setTimeout(() => markRead(items), 1500);
+}
+
+async function showState() {
+  $('install').classList.toggle('hide', standalone || !/iPhone|iPad/.test(navigator.userAgent));
+  if (!pushable) { $('status').textContent = standalone ? 'push unsupported' : 'open from Home Screen'; return; }
+  const reg = await navigator.serviceWorker.register('sw.js');
+  const sub = await reg.pushManager.getSubscription();
+  const on = sub && Notification.permission === 'granted';
+  $('status').textContent = on ? 'notifications on' : 'not set up';
+  $('status').classList.toggle('on', !!on);
+  $('enable').classList.toggle('hide', !!on);
+  if (on) $('code').value = codeFor(sub);
+  if (on && !localStorageGet('paired-shown')) { $('pair').classList.remove('hide'); localStorageSet('paired-shown', '1'); }
+}
+function localStorageGet(k) { try { return localStorage.getItem(k); } catch (_) { return null; } }
+function localStorageSet(k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
+
+$('enableBtn').onclick = async () => {
+  try {
+    const p = await Notification.requestPermission();
+    if (p !== 'granted') { $('status').textContent = 'notifications blocked'; return; }
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: unb64(VAPID) });
+    $('code').value = codeFor(sub);
+    $('pair').classList.remove('hide');
+    localStorageSet('paired-shown', '1');
+    showState();
+  } catch (e) { $('status').textContent = 'error: ' + e.message; }
+};
+$('copyBtn').onclick = async () => {
+  try { await navigator.clipboard.writeText($('code').value); $('copied').textContent = 'Copied.'; }
+  catch (_) { $('code').select(); $('copied').textContent = 'Select all and copy.'; }
+};
+$('codeBtn').onclick = () => $('pair').classList.toggle('hide');
+$('clearBtn').onclick = () => { if (confirm('Clear all alerts on this phone?')) clearAll(); };
+$('chips').onclick = e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  filter = b.dataset.k; document.querySelectorAll('.chip').forEach(c => c.classList.toggle('sel', c === b)); render();
+};
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', render);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') render(); });
+setInterval(render, 60000);
+showState(); render();
+</script>
+</body>
+</html>
