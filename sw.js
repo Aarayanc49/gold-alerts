@@ -1,6 +1,6 @@
 // Gold Alerts service worker: shows each push as a notification and keeps a copy in
 // IndexedDB so the app can list everything that arrived, even while it was closed.
-const SHELL = 'gold-alerts-v1';
+const SHELL = 'gold-alerts-v2';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -25,8 +25,12 @@ self.addEventListener('fetch', e => {
 
 function db() {
   return new Promise((ok, no) => {
-    const r = indexedDB.open('gold-alerts', 1);
-    r.onupgradeneeded = () => r.result.createObjectStore('alerts', { keyPath: 'id' });
+    const r = indexedDB.open('gold-alerts', 2);
+    r.onupgradeneeded = () => {
+      const names = r.result.objectStoreNames;
+      if (!names.contains('alerts')) r.result.createObjectStore('alerts', { keyPath: 'id' });
+      if (!names.contains('config')) r.result.createObjectStore('config');
+    };
     r.onsuccess = () => ok(r.result);
     r.onerror = () => no(r.error);
   });
@@ -35,8 +39,10 @@ function db() {
 async function save(a) {
   const d = await db();
   await new Promise((ok, no) => {
-    const tx = d.transaction('alerts', 'readwrite');
+    const tx = d.transaction(['alerts', 'config'], 'readwrite');
     tx.objectStore('alerts').put(a);
+    // the PC sends the levels feed's address inside every push, so it never sits in this repo
+    if (a.feed) tx.objectStore('config').put(a.feed, 'feed');
     tx.oncomplete = ok; tx.onerror = () => no(tx.error);
   });
   const n = await new Promise(ok => {

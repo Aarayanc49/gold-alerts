@@ -60,6 +60,25 @@ textarea { width: 100%; font: 12px/1.35 ui-monospace, Menlo, monospace; backgrou
 .item.unread .it::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); align-self: center; margin-right: -2px; }
 .empty { text-align: center; color: var(--mute); padding: 30px 0; }
 .hide { display: none; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--card); border: 1px solid var(--line); border-radius: 11px; padding: 3px; margin-bottom: 12px; }
+.tab { background: transparent; color: var(--mute); font-weight: 600; padding: 8px; border-radius: 8px; }
+.tab.sel { background: var(--gold-soft); color: var(--ink); }
+.px { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.px b { font-size: 28px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.px span { color: var(--mute); font-size: 13px; text-align: right; }
+input[type=search] { width: 100%; font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--card); color: var(--ink); margin-bottom: 8px; -webkit-appearance: none; }
+.lv { display: grid; grid-template-columns: 78px 56px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: start; }
+.lv:last-child { border-bottom: 0; }
+.lv .p { font-weight: 700; font-variant-numeric: tabular-nums; }
+.lv .d { font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; padding-top: 1px; }
+.lv .d.up { color: var(--up); } .lv .d.dn { color: var(--down); }
+.lv .l { font-size: 13px; color: var(--mute); }
+.lv .l b { color: var(--ink); font-weight: 600; }
+.lv .s { font-size: 12px; color: var(--warn); margin-top: 3px; }
+.lv.near { background: var(--gold-soft); margin: 0 -14px; padding: 10px 14px; }
+.now { display: flex; align-items: center; gap: 8px; color: var(--gold); font-size: 12px; font-weight: 700; padding: 6px 0; }
+.now::before, .now::after { content: ""; flex: 1; height: 1px; background: var(--gold); opacity: .6; }
 .small { font-size: 12px; color: var(--mute); }
 </style>
 </head>
@@ -69,6 +88,19 @@ textarea { width: 100%; font: 12px/1.35 ui-monospace, Menlo, monospace; backgrou
   <span id="status" class="pill">not set up</span>
 </header>
 
+<div class="tabs" id="tabs">
+  <button class="tab sel" data-v="alertsView">Alerts</button>
+  <button class="tab" data-v="levelsView">Levels</button>
+</div>
+
+<section id="levelsView" class="hide">
+  <div class="card px"><b id="lvPrice">—</b><span id="lvMeta">loading levels…</span></div>
+  <input type="search" id="lvSearch" placeholder="Search: 3850, FVG, TURTLE, session…" autocomplete="off">
+  <div class="chips" id="lvBots"></div>
+  <div class="card" id="lvList"><div class="empty">Levels arrive with the next alert from the PC.</div></div>
+</section>
+
+<section id="alertsView">
 <div id="install" class="card hide">
   <h2>Add this to your Home Screen first</h2>
   <p>iPhone only sends notifications to apps opened from the Home Screen.</p>
@@ -108,6 +140,7 @@ textarea { width: 100%; font: 12px/1.35 ui-monospace, Menlo, monospace; backgrou
   <button class="chip" data-k="bot">Bots</button>
 </div>
 <div class="card" id="feed"><div class="empty">Nothing yet.</div></div>
+</section>
 
 <script>
 const VAPID = 'BGNkBXvjVFSHrozgv_14js-EQ2Lol0KUkV9RZ5igZAr_AqdwEOUMC7clcly1ZbcX272IlJLyihKnkSp90uFmsQA';
@@ -126,8 +159,12 @@ function codeFor(sub) { return b64(new TextEncoder().encode(JSON.stringify(sub.t
 
 function db() {
   return new Promise((ok, no) => {
-    const r = indexedDB.open('gold-alerts', 1);
-    r.onupgradeneeded = () => r.result.createObjectStore('alerts', { keyPath: 'id' });
+    const r = indexedDB.open('gold-alerts', 2);
+    r.onupgradeneeded = () => {
+      const names = r.result.objectStoreNames;
+      if (!names.contains('alerts')) r.result.createObjectStore('alerts', { keyPath: 'id' });
+      if (!names.contains('config')) r.result.createObjectStore('config');
+    };
     r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error);
   });
 }
@@ -205,6 +242,66 @@ $('chips').onclick = e => {
 if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', render);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') render(); });
 setInterval(render, 60000);
+// ---------------------------------------------------------------- levels
+let LV = null, lvBot = 'All', lvTimer = null;
+async function cfg(k, v) {
+  const d = await db();
+  return new Promise(ok => {
+    const tx = d.transaction('config', v === undefined ? 'readonly' : 'readwrite');
+    const st = tx.objectStore('config');
+    const q = v === undefined ? st.get(k) : st.put(v, k);
+    q.onsuccess = () => ok(v === undefined ? q.result : v); q.onerror = () => ok(null);
+  });
+}
+async function loadLevels() {
+  if (!LV) LV = await cfg('levels');                     // last copy, so it opens instantly / offline
+  drawLevels();
+  const id = await cfg('feed');
+  if (!id) { $('lvMeta').textContent = 'waiting for the PC to send the levels address'; return; }
+  try {
+    const r = await fetch('https://api.github.com/gists/' + id, { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status === 403 ? 'GitHub rate limit, try in a few minutes' : 'HTTP ' + r.status);
+    const g = await r.json(); const f = g.files['levels.json'];
+    const txt = f.truncated ? await (await fetch(f.raw_url)).text() : f.content;
+    LV = JSON.parse(txt); cfg('levels', LV); drawLevels();
+  } catch (e) { $('lvMeta').textContent = (LV ? 'showing last copy · ' : '') + e.message; }
+}
+function drawLevels() {
+  if (!LV) return;
+  const bid = LV.bid, nearP = LV.near_p || 30;
+  $('lvPrice').textContent = bid.toFixed(2);
+  const tr = LV.trend || {};
+  $('lvMeta').innerHTML = `updated ${ago(LV.t)} ago` + (tr.h1_bias !== undefined ? `<br>H1 ${tr.h1_bias > 0 ? 'up' : tr.h1_bias < 0 ? 'down' : 'flat'} · 1d ${(+tr.d1).toFixed(0)} · 5d ${(+tr.d5).toFixed(0)}` : '');
+  const bots = ['All', ...new Set(LV.levels.flatMap(x => x.bots || []))];
+  $('lvBots').innerHTML = bots.map(b => `<button class="chip ${b === lvBot ? 'sel' : ''}" data-b="${esc(b)}">${esc(b)}</button>`).join('');
+  const q = $('lvSearch').value.trim().toLowerCase();
+  const rows = LV.levels.filter(x => (lvBot === 'All' || (x.bots || []).includes(lvBot)) &&
+    (!q || x.price.toFixed(2).includes(q) || x.labels.join(' ').toLowerCase().includes(q) || (x.bb && String(x.bb.state).toLowerCase().includes(q))))
+    .sort((a, b) => b.price - a.price);
+  let html = '', marked = false;
+  for (const x of rows) {
+    if (!marked && x.price < bid) { html += `<div class="now">price ${bid.toFixed(2)}</div>`; marked = true; }
+    const dp = (x.price - bid) / 0.1;
+    const labs = x.labels.map(l => {
+      const b = (x.bots || []).find(n => l.startsWith(n + ' ')) || '';
+      return `<b>${esc(b)}</b>${esc(l.slice(b.length))}`; }).join('<br>');
+    html += `<div class="lv ${Math.abs(dp) <= nearP ? 'near' : ''}"><div class="p">${x.price.toFixed(2)}</div>
+      <div class="d ${dp > 0 ? 'up' : 'dn'}">${dp > 0 ? '+' : ''}${dp.toFixed(0)}p</div>
+      <div class="l">${labs}${x.bb && x.bb.state ? `<div class="s">${esc(x.bb.state)}</div>` : ''}</div></div>`;
+  }
+  if (!marked && rows.length) html += `<div class="now">price ${bid.toFixed(2)}</div>`;
+  $('lvList').innerHTML = html || '<div class="empty">No level matches.</div>';
+}
+$('lvSearch').oninput = drawLevels;
+$('lvBots').onclick = e => { const b = e.target.closest('.chip'); if (b) { lvBot = b.dataset.b; drawLevels(); } };
+$('tabs').onclick = e => {
+  const t = e.target.closest('.tab'); if (!t) return;
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('sel', x === t));
+  ['alertsView', 'levelsView'].forEach(v => $(v).classList.toggle('hide', v !== t.dataset.v));
+  clearInterval(lvTimer);
+  if (t.dataset.v === 'levelsView') { loadLevels(); lvTimer = setInterval(loadLevels, 120000); }
+};
+
 showState(); render();
 </script>
 </body>
