@@ -60,7 +60,7 @@ textarea { width: 100%; font: 12px/1.35 ui-monospace, Menlo, monospace; backgrou
 .item.unread .it::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); align-self: center; margin-right: -2px; }
 .empty { text-align: center; color: var(--mute); padding: 30px 0; }
 .hide { display: none; }
-.tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--card); border: 1px solid var(--line); border-radius: 11px; padding: 3px; margin-bottom: 12px; }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--card); border: 1px solid var(--line); border-radius: 11px; padding: 3px; margin-bottom: 12px; }
 .tab { background: transparent; color: var(--mute); font-weight: 600; padding: 8px; border-radius: 8px; }
 .tab.sel { background: var(--gold-soft); color: var(--ink); }
 .px { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
@@ -80,6 +80,48 @@ input[type=search] { width: 100%; font: inherit; padding: 10px 12px; border-radi
 .now { display: flex; align-items: center; gap: 8px; color: var(--gold); font-size: 12px; font-weight: 700; padding: 6px 0; }
 .now::before, .now::after { content: ""; flex: 1; height: 1px; background: var(--gold); opacity: .6; }
 .small { font-size: 12px; color: var(--mute); }
+.bh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.bh h2 { margin: 0; font-size: 16px; }
+.money { font-size: 13px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.state { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--up); flex: none; }
+.state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.state.down { color: var(--down); }
+.doing { font-weight: 600; margin: 8px 0 2px; }
+.rule { font-size: 13px; color: var(--mute); margin-bottom: 8px; }
+.gate { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: var(--mute); margin-bottom: 6px; }
+.tag { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--gold-soft); color: var(--gold); }
+.tag.long { background: color-mix(in srgb, var(--up) 15%, transparent); color: var(--up); }
+.tag.short { background: color-mix(in srgb, var(--down) 15%, transparent); color: var(--down); }
+.tag.none { background: color-mix(in srgb, var(--mute) 15%, transparent); color: var(--mute); }
+.sub { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--mute); margin: 12px 0 4px; }
+.row { display: grid; grid-template-columns: 66px 50px 1fr; gap: 8px; font-size: 13px; padding: 5px 0; border-top: 1px solid var(--line); }
+.row .p { font-weight: 600; font-variant-numeric: tabular-nums; }
+.row .d { text-align: right; font-variant-numeric: tabular-nums; color: var(--mute); }
+.row .l { color: var(--mute); }
+.row .l i { display: block; font-style: normal; color: var(--warn); font-size: 12px; }
+.th { display: grid; grid-template-columns: 42px 1fr; gap: 8px; font-size: 13px; padding: 5px 0; border-top: 1px solid var(--line); }
+.th time { color: var(--mute); font-variant-numeric: tabular-nums; }
+details summary { font-size: 12px; color: var(--gold); padding: 6px 0 0; list-style: none; cursor: pointer; }
+details summary::-webkit-details-marker { display: none; }
+.warnbox { background: color-mix(in srgb, var(--warn) 12%, var(--card)); border-color: color-mix(in srgb, var(--warn) 40%, var(--line)); font-size: 13px; }
+.sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.sum b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.sum span { font-size: 12px; color: var(--mute); }
+.up { color: var(--up); } .dn { color: var(--down); }
+.tr .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.tr .pl { text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; flex: none; }
+.tr .pl b { font-size: 22px; display: block; line-height: 1.1; }
+.tr .meta { font-size: 13px; color: var(--mute); font-variant-numeric: tabular-nums; margin-top: 4px; }
+.track { position: relative; height: 8px; border-radius: 4px; margin: 14px 0 6px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--down) 40%, transparent), color-mix(in srgb, var(--up) 40%, transparent)); }
+.track .e { position: absolute; top: -3px; width: 2px; height: 14px; margin-left: -1px; background: var(--ink); opacity: .45; }
+.track .n { position: absolute; top: -4px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--gold); border: 2px solid var(--card); }
+.ends { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.why { font-size: 13px; color: var(--mute); margin-top: 8px; }
+.cl { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.cl:first-child { border-top: 0; }
+.cl .r { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.cl .m { color: var(--mute); }
 </style>
 </head>
 <body>
@@ -91,7 +133,21 @@ input[type=search] { width: 100%; font: inherit; padding: 10px 12px; border-radi
 <div class="tabs" id="tabs">
   <button class="tab sel" data-v="alertsView">Alerts</button>
   <button class="tab" data-v="levelsView">Levels</button>
+  <button class="tab" data-v="botsView">Bots</button>
+  <button class="tab" data-v="tradesView">Trades</button>
 </div>
+
+<section id="botsView" class="hide">
+  <div class="card px"><b id="bPrice">—</b><span id="bMeta">loading…</span></div>
+  <div id="bList"><div class="card empty">The bots' state arrives with the next alert from the PC.</div></div>
+</section>
+
+<section id="tradesView" class="hide">
+  <div class="card sum" id="tSum"><div><b>—</b><span>open P&amp;L</span></div><div><b>—</b><span>open</span></div><div><b>—</b><span>closed 24h</span></div></div>
+  <div id="tList"></div>
+  <div class="feedhead"><h2>Closed, last 24 hours</h2><span class="small" id="tMeta"></span></div>
+  <div class="card" id="tClosed"><div class="empty">Nothing closed.</div></div>
+</section>
 
 <section id="levelsView" class="hide">
   <div class="card px"><b id="lvPrice">—</b><span id="lvMeta">loading levels…</span></div>
@@ -253,18 +309,25 @@ async function cfg(k, v) {
     q.onsuccess = () => ok(v === undefined ? q.result : v); q.onerror = () => ok(null);
   });
 }
+// The raw gist URL has no 60-an-hour API limit; a fresh query string skips the 5-minute CDN cache.
+async function gistFile(id, name) {
+  try {
+    const r = await fetch(`https://gist.githubusercontent.com/Aarayanc49/${id}/raw/${name}?t=${Date.now()}`, { cache: 'no-store' });
+    if (r.ok) return JSON.parse(await r.text());
+  } catch (_) {}
+  const r = await fetch('https://api.github.com/gists/' + id, { cache: 'no-store' });
+  if (!r.ok) throw new Error(r.status === 403 ? 'GitHub rate limit, try in a few minutes' : 'HTTP ' + r.status);
+  const f = (await r.json()).files[name];
+  if (!f) throw new Error('the PC has not sent ' + name + ' yet');
+  return JSON.parse(f.truncated ? await (await fetch(f.raw_url)).text() : f.content);
+}
 async function loadLevels() {
   if (!LV) LV = await cfg('levels');                     // last copy, so it opens instantly / offline
   drawLevels();
   const id = await cfg('feed');
   if (!id) { $('lvMeta').textContent = 'waiting for the PC to send the levels address'; return; }
-  try {
-    const r = await fetch('https://api.github.com/gists/' + id, { cache: 'no-store' });
-    if (!r.ok) throw new Error(r.status === 403 ? 'GitHub rate limit, try in a few minutes' : 'HTTP ' + r.status);
-    const g = await r.json(); const f = g.files['levels.json'];
-    const txt = f.truncated ? await (await fetch(f.raw_url)).text() : f.content;
-    LV = JSON.parse(txt); cfg('levels', LV); drawLevels();
-  } catch (e) { $('lvMeta').textContent = (LV ? 'showing last copy · ' : '') + e.message; }
+  try { LV = await gistFile(id, 'levels.json'); cfg('levels', LV); drawLevels(); }
+  catch (e) { $('lvMeta').textContent = (LV ? 'showing last copy · ' : '') + e.message; }
 }
 function drawLevels() {
   if (!LV) return;
@@ -294,13 +357,108 @@ function drawLevels() {
 }
 $('lvSearch').oninput = drawLevels;
 $('lvBots').onclick = e => { const b = e.target.closest('.chip'); if (b) { lvBot = b.dataset.b; drawLevels(); } };
+// ---------------------------------------------------------------- bots + trades (live.json)
+// Everything here is what the bots themselves wrote: their state files, their decision log,
+// their own gate numbers, and MT5's positions. Nothing is scored or explained on the phone.
+let LIVE = null, view = 'alertsView';
+const sgn = (x, d = 0) => (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(d);
+const usd = x => (x < 0 ? '−$' : x > 0 ? '+$' : '$') + Math.abs(x).toFixed(2);
+const pc = x => x > 0 ? 'up' : x < 0 ? 'dn' : '';
+const hm = t => new Date(t * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const dur = s => s < 3600 ? Math.max(0, Math.round(s / 60)) + 'm' : s < 86400 ? (s / 3600).toFixed(1) + 'h' : (s / 86400).toFixed(1) + 'd';
+const since = t => { const s = Date.now() / 1000 - t; return s < 60 ? 'just now' : ago(t) + ' ago'; };
+function sideTag(txt) {
+  const t = String(txt);
+  return `<span class="tag ${/LONG/.test(t) ? 'long' : /SHORT/.test(t) ? 'short' : /both/.test(t) ? '' : 'none'}">${esc(t)}</span>`;
+}
+
+async function loadLive() {
+  if (!LIVE) LIVE = await cfg('live');
+  drawLive();
+  const id = await cfg('feed');
+  if (!id) { $('bMeta').textContent = $('tMeta').textContent = 'waiting for the PC to send the feed address'; return; }
+  try { LIVE = await gistFile(id, 'live.json'); cfg('live', LIVE); drawLive(); }
+  catch (e) { $('bMeta').textContent = $('tMeta').textContent = (LIVE ? 'showing last copy · ' : '') + e.message; }
+}
+function drawLive() { if (LIVE) { drawBots(); drawTrades(); } }
+
+function drawBots() {
+  const L = LIVE;
+  $('bPrice').textContent = L.bid.toFixed(2);
+  $('bMeta').innerHTML = `updated ${since(L.t)}<br>${L.trades.length} open · <span class="${pc(L.floating)}">${usd(L.floating)}</span>`;
+  let html = '';
+  if (L.errors && L.errors.length) html += `<div class="card warnbox">${L.errors.map(e => `${hm(e.t)} ${esc(e.text)}`).join('<br>')}</div>`;
+  if (!L.thoughts_on) html += `<div class="card warnbox">Bots 2–7 log their decisions once live_multibot.py is restarted. Until then this shows their state only.</div>`;
+  for (const b of L.bots) {
+    const x = b.extra || {};
+    const fresh = b.up && b.age_s != null && b.age_s < 300;
+    const st = !b.up ? 'NOT RUNNING' : b.age_s == null ? 'running' : `running · ${b.age_s < 90 ? b.age_s + 's' : Math.round(b.age_s / 60) + 'm'}`;
+    html += `<div class="card"><div class="bh"><h2>${esc(b.name)}</h2><span class="state ${fresh ? '' : 'down'}">${st}</span></div>
+      <div class="money">ledger $${(+b.ledger).toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+      <div class="doing">${esc(b.doing)}</div><div class="rule">${esc(b.rule)}</div>
+      <div class="gate">takes ${sideTag(b.gate.allows)} <span>${esc(b.gate.why)}</span></div>`;
+    if (x.last_error) html += `<div class="why dn">error: ${esc(x.last_error)}</div>`;
+    if (x.trade_allowed === false) html += `<div class="why dn">Algo Trading is off: its orders will be refused.</div>`;
+    if (x.bored) html += `<div class="gate">bored: ${x.bored.yellow_last12} yellow M5 candle${x.bored.yellow_last12 === 1 ? '' : 's'} in the last hour · ADX ${x.bored.adx} · bar ${esc(x.bored.bar)}</div>`;
+    if (b.pending.length) html += `<div class="sub">Limit orders it is waiting on</div>` + b.pending.map(q =>
+      `<div class="row"><div class="p">${q.px.toFixed(2)}</div><div class="d">${sgn(q.dist_p)}p</div><div class="l">${sideTag(q.side)} ${esc(q.note)}<i>expires in ${dur(q.expires_min * 60)}</i></div></div>`).join('');
+    if (x.zones && x.zones.length) html += `<div class="sub">TOP G zones · last ran ${esc(String(x.last_run || '').slice(11, 16))} UTC</div>` + x.zones.map(z =>
+      `<div class="row"><div class="p">${z.lo.toFixed(2)}</div><div class="d">${sgn(z.dist_p)}p</div><div class="l">${esc(z.label)} · ${esc(z.role)}${z.tapped ? ' · tapped' : ''}</div></div>`).join('');
+    else if (b.watching.length) html += `<div class="sub">${x.bored ? 'Levels it watches' : 'Its nearest lines'}</div>` + b.watching.map(w =>
+      `<div class="row"><div class="p">${w.price.toFixed(2)}</div><div class="d">${sgn(w.dist_p)}p</div><div class="l">${esc(w.label)}${w.state ? `<i>${esc(w.state)}</i>` : ''}</div></div>`).join('');
+    if (x.record) html += `<div class="gate" style="margin-top:8px">record: ${x.record.n} closed, ${x.record.won} won, ${sgn(x.record.pips)} pips</div>`;
+    const th = b.thoughts.slice().reverse();
+    const row = t => `<div class="th"><time>${hm(t.t)}</time><div>${esc(t.text)}</div></div>`;
+    html += `<div class="sub">${x.bored ? 'Its last setups and what it did' : 'What it decided'}</div>` +
+      (th.length ? th.slice(0, 3).map(row).join('') +
+        (th.length > 3 ? `<details><summary>${th.length - 3} more</summary>${th.slice(3).map(row).join('')}</details>` : '')
+        : `<div class="th"><time>—</time><div class="small">nothing in the last 24 hours</div></div>`);
+    html += `</div>`;
+  }
+  $('bList').innerHTML = html;
+}
+
+function drawTrades() {
+  const L = LIVE, now = Date.now() / 1000;
+  const c24 = L.closed.reduce((a, c) => a + c.usd, 0);
+  $('tSum').innerHTML = `<div><b class="${pc(L.floating)}">${usd(L.floating)}</b><span>open P&amp;L</span></div>
+    <div><b>${L.trades.length}</b><span>open</span></div>
+    <div><b class="${pc(c24)}">${usd(c24)}</b><span>closed 24h (${L.closed.length})</span></div>`;
+  $('tMeta').textContent = `updated ${since(L.t)} · ${L.bid.toFixed(2)}`;
+  $('tList').innerHTML = L.trades.length ? L.trades.map(t => {
+    const d = t.side === 'LONG' ? 1 : -1;
+    let bar = '';
+    if (t.sl && t.tp) {               // stop on the left, target on the right, whichever the side
+      const at = px => Math.max(0, Math.min(100, (px - t.sl) / (t.tp - t.sl) * 100));
+      bar = `<div class="track"><div class="e" style="left:${at(t.entry)}%"></div><div class="n" style="left:${at(t.now)}%"></div></div>
+        <div class="ends"><span>stop ${t.sl.toFixed(2)} · ${t.to_sl_p}p away</span><span>target ${t.tp.toFixed(2)} · ${t.to_tp_p}p</span></div>`;
+    } else if (t.sl) bar = `<div class="ends" style="margin-top:8px"><span>stop ${t.sl.toFixed(2)} · ${t.to_sl_p}p away</span><span>no target</span></div>`;
+    const lock = t.be ? ' · stop locked in profit' : t.be === false ? ' · lock not armed yet' : '';
+    return `<div class="card tr"><div class="top"><div><h2 style="margin:0;font-size:16px">${esc(t.bot)}</h2>
+        <div class="gate" style="margin:4px 0 0">${sideTag(t.side)} ${t.lots} lots · open ${dur(now - t.t_open)}${lock}</div></div>
+        <div class="pl ${pc(t.usd)}"><b>${usd(t.usd)}</b>${sgn(t.pips, 1)} pips</div></div>
+      <div class="meta">${t.entry.toFixed(2)} → ${t.now.toFixed(2)}</div>${bar}
+      ${t.why ? `<div class="why">${t.kind ? esc(t.kind) + ': ' : ''}${esc(t.why)}</div>` : ''}</div>`;
+  }).join('') : '<div class="card empty">No open trades.</div>';
+  $('tClosed').innerHTML = L.closed.length ? L.closed.map(c => `<div class="cl">
+      <div><b>${esc(c.bot)}</b> ${c.side ? sideTag(c.side) : ''}</div><div class="r ${pc(c.usd)}">${usd(c.usd)}</div>
+      <div class="m">${c.entry == null ? '' : c.entry.toFixed(2) + ' → '}${c.exit.toFixed(2)} · ${esc(c.how === 'stop' && c.usd > 0 ? 'stop locked in profit' : c.how)} ·${hm(c.t)}${c.t_open ? ' · held ' + dur(c.t - c.t_open) : ''}</div>
+      <div class="m" style="text-align:right">${c.pips == null ? '' : sgn(c.pips) + 'p'}</div></div>`).join('')
+    : '<div class="empty">Nothing closed.</div>';
+}
+
 $('tabs').onclick = e => {
   const t = e.target.closest('.tab'); if (!t) return;
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('sel', x === t));
-  ['alertsView', 'levelsView'].forEach(v => $(v).classList.toggle('hide', v !== t.dataset.v));
+  view = t.dataset.v;
+  ['alertsView', 'levelsView', 'botsView', 'tradesView'].forEach(v => $(v).classList.toggle('hide', v !== view));
   clearInterval(lvTimer);
-  if (t.dataset.v === 'levelsView') { loadLevels(); lvTimer = setInterval(loadLevels, 120000); }
+  if (view === 'levelsView') { loadLevels(); lvTimer = setInterval(loadLevels, 120000); }
+  if (view === 'botsView' || view === 'tradesView') { loadLive(); lvTimer = setInterval(loadLive, 20000); }
 };
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && (view === 'botsView' || view === 'tradesView')) loadLive();
+});
 
 showState(); render();
 </script>

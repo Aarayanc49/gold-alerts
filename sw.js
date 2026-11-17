@@ -1,6 +1,6 @@
 // Gold Alerts service worker: shows each push as a notification and keeps a copy in
 // IndexedDB so the app can list everything that arrived, even while it was closed.
-const SHELL = 'gold-alerts-v2';
+const SHELL = 'gold-alerts-v3';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
